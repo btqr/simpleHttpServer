@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
@@ -10,10 +11,13 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //HttpServer server = new HttpServer(8080, sampleRequestHandler());
-        HttpServer server = new HttpServer(8080, Executors.newFixedThreadPool(10), sampleRequestHandler());
-
-        Thread serverThread = new Thread(server);
-        serverThread.start();
+        ExecutorService threadPool = Executors.newFixedThreadPool(10);
+        HttpServer server = new HttpServer(8080, threadPool, sampleRequestHandler());
+        server.start();
+        Thread.sleep(5000);
+        server.terminateImmediately();
+        server.join();
+        threadPool.shutdown();
     }
 
     // We can mock this to be CPU intensive if we wish :)
